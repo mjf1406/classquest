@@ -1,0 +1,55 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1735701647962,
+      "tag": "0000_reset",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1735745435125,
+      "tag": "0001_remove-unique-email",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1735745901591,
+      "tag": "0002_remove-name",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1735764615338,
+      "tag": "0003_added-added_demo-columnp-to-users",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1735772188152,
+      "tag": "0004_add-class-code",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1735914684706,
+      "tag": "0005_added-beta-signups",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1735914834902,
+      "tag": "0006_good_silhouette",
+      "breakpoints": true
+    }
+  ]
+}
