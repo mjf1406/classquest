@@ -4,6 +4,8 @@ Your classroom. Gamified.
 Dive into a world where education meets adventure!
 Earn rewards, unlock achievements, and transform everyday learning into an epic quest.
 
+Hello!
+
 ## Name Ideas
 
 - Class Commander
