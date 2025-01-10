@@ -4,8 +4,6 @@ Your classroom. Gamified.
 Dive into a world where education meets adventure!
 Earn rewards, unlock achievements, and transform everyday learning into an epic quest.
 
-Hello! Again 🤣 
-
 ## Name Ideas
 
 - Class Commander
@@ -188,7 +186,6 @@ Hello! Again 🤣
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
-- test tested 
 
 ## Change Log
 
