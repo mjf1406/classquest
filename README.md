@@ -1,6 +1,8 @@
-# Mr. Monkey's Worksheet Generators
+# ClassQuest
 
-This is the collection of worksheet generators that I have created as I needed them in my teaching career.
+Your classroom. Gamified.
+Dive into a world where education meets adventure!
+Earn rewards, unlock achievements, and transform everyday learning into an epic quest.
 
 ## Name Ideas
 
@@ -10,6 +12,7 @@ This is the collection of worksheet generators that I have created as I needed t
 
 ### p5
 
+- Learn [GoLang](https://www.youtube.com/watch?v=lNd7XlXwlho) in order to speed up data fetching by writing [the API](https://github.com/burakorkmez/react-go-tutorial/blob/master/main.go) in it
 - Look into the APIs to determine the tier of a vocabulary word
   - [Datamuse API](https://www.datamuse.com/api/)
     https://www.npmjs.com/package/datamuse
@@ -73,6 +76,7 @@ This is the collection of worksheet generators that I have created as I needed t
 - tool: Shuffler -- UI now indicates who has been first/last and how many times and on what date
 - tool: Assigner, Round-Robin -- a history of items is now stored with a datetime object and is displayed in the UI as a table
 - ⚠️ local-first: use [TinyBase](https://tinybase.org/) to implement a local-first architecture
+  - there may be an option to use [Turso](https://turso.tech/local-first) in the future
 - ⚠️ i18n: use [next-international](https://next-international.vercel.app/docs/app-setup) for localization
 - Assigner: Round Robin -- need some tests for this one to ensure it's working.
 - PAGE: assigner dashboard
@@ -84,22 +88,39 @@ This is the collection of worksheet generators that I have created as I needed t
   - [ ] prevents absent students from being awarded points
   - [ ] prevents absent students from losing points
   - [ ] prevents absent students from redeeming points
+- BETA LAUNCH
+  - Need to publish the app on [google console](https://console.cloud.google.com/auth/audience?authuser=0&inv=1&invt=AbmbDA&project=classcraft-clone)
+  - Need to launch on [Clerk](https://clerk.com/docs/deployments/overview)
+  - Add the site to Google Console so it appears on Google Search
 
 ### p1
 
+- UX: Users can now add demo classes -- will need to do the following
+  - **What if we just automatically give them assistant access to a pre-created demo class when they join the site?**
+  1. Create a class for the user as the teacher called "RANDOM_ANIMAL - Demo" with year as current year.
+  2. Insert students into `students` table.
+  3. Insert students into `student_classes` table.
+  4. Insert default behaviors
+  5. Insert default redemption items
+  6. Randomly award various behaviors
+  7. Randomly have student redeem things
+  8. soooooo many more
 - FEATURE: Points -- track points on a per student, group, and class basis
   - [ ] award points
     - [x] to a single student
       - [x] clicking on the student opens a dialog with a grid list of all behaviors, with positive and needs work as tabs
       - [x] need a quantity that defaults to 1
     - [x] to selected students
-    - [ ] streaks are tracked for each student, and the teacher is alerted
-      - [ ] off days should be declared in the settings, so they are excluded from breaking streaks
+    - [ ] streaks for behaviors
+      - looks at patterns automatically, while ignoring the off days and off dates
+      - for now, only see how many days in a row, look for the longest streak for each behavior
+      - list the top 5 streaks on the card, prioritizing current streaks (need to do it today/next on day to continue), view all to see for each behavior
+      - is it performed daily/weekly/monthly?
   - [ ] positive and negative behavior
     - [x] user can create them, setting an icon, name, and point value
     - [x] user can edit
     - [x] user can delete
-    - [ ] teacher is notified when a student has a negative behavior streak
+    - [ ] teacher is notified when a student has a streak
   - [ ] Can delete on teacher-facing student dashboard
 - PAGE: Class Dashboard
   - behavior streaks
@@ -159,30 +180,11 @@ This is the collection of worksheet generators that I have created as I needed t
 - BUG: fixed a bug that would cause the mouse to click through the sorting dropdown .
 - FEATURE: Expectations -- can edit expectations
 - FEATURE: Expectations -- can delete expectations
-- UX: Users can now add demo classes -- will need to do the following
-  - **What if we just automatically give them assistant access to a pre-created demo class when they join the site?**
-  1. Create a class for the user as the teacher called "RANDOM_ANIMAL - Demo" with year as current year.
-  2. Insert students into `students` table.
-  3. Insert students into `student_classes` table.
-  4. Insert default behaviors
-  5. Insert default redemption items
-  6. Randomly award various behaviors
-  7. Randomly have student redeem things
-  8. soooooo many more
 - Branding: Pick a [name](https://docs.google.com/spreadsheets/d/1RoLmZ_o2Bnqvu4a_prFKneWKNbPndqWqoSxR9zfRgLE/edit?gid=0#gid=0)
 - PAGE: Settings -- Need...
   1. Customizable achievement thresholds
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
-- Streaks for behaviors
-  - looks at patterns automatically, while ignoring the off days and off dates
-  - for now, only see how many days in a row, look for the longest streak for each behavior
-  - list the top 5 streaks on the card, prioritizing current streaks (need to do it today/next on day to continue), view all to see for each behavior
-  - is it performed daily/weekly/monthly?
-- TOOL: Round-Robin Assigner
-  - Display historical data in a table
-- TOOL: Seats Assigner
-  - Display historical data in a table
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
 
 ## Change Log
@@ -194,7 +196,6 @@ DB = database
 
 2025/01/07
 
-- more poop
 - UX: added a display in the form of a table to the Seats and Round Robin assigner on their respective pages
 
 2025/01/06
