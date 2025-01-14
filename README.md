@@ -174,6 +174,9 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
     - [ ] achievements
     - [ ] streaks
     - [ ] expectations
+- API Optimization 
+    - store total points, redeemed points, and lost points in student_classes
+    - 
 
 ### p0
 
