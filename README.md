@@ -189,6 +189,9 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
+- fixed an issue where rewarding points is no longer optimistic on the class page 
+- The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard 
+- 
 
 ## Change Log
 
