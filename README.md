@@ -193,7 +193,8 @@ This should not build
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
 - fixed an issue where rewarding points is no longer optimistic on the class page 
 - The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard 
-- 
+- BUG: fixed an issue where you could not open the tasks or expectations from inside a group
+- BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the group
 
 ## Change Log
 
