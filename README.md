@@ -108,6 +108,7 @@ This should not build
   7. Randomly have student redeem things
   8. soooooo many more
 - FEATURE: Points -- track points on a per student, group, and class basis
+  - Make it easier for students to give points to each other. Right now, I have to redeem on the giver and then reward on the receiver. It'd be nice to just be able to transfer it.
   - [ ] award points
     - [x] to a single student
       - [x] clicking on the student opens a dialog with a grid list of all behaviors, with positive and needs work as tabs
@@ -195,6 +196,7 @@ This should not build
 - The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard 
 - BUG: fixed an issue where you could not open the tasks or expectations from inside a group
 - BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the group
+- BUG: fixed the tasks table no longer rendering over the navbar
 
 ## Change Log
 
