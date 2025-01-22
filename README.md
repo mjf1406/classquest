@@ -197,6 +197,7 @@ This should not build
 - BUG: fixed an issue where you could not open the tasks or expectations from inside a group
 - BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the group
 - BUG: fixed the tasks table no longer rendering over the navbar
+- BUG: the Assigner, Jobs history table does not seem to have the right data as everything shows 0
 
 ## Change Log
 
