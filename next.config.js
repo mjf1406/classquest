@@ -5,6 +5,10 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  source: "/",
+  destination: "/classes",
+  permanent: true, // or false for temporary redirect
+};
 
 export default config;
