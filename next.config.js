@@ -1,14 +1,14 @@
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
- * for Docker builds.
- */
-await import("./src/env.js");
-
 /** @type {import("next").NextConfig} */
 const config = {
-  source: "/",
-  destination: "/classes",
-  permanent: true, // or false for temporary redirect
+  redirects: async () => {
+    return [
+      {
+        source: "/",
+        destination: "/classes",
+        permanent: true, // or false for temporary redirect
+      },
+    ];
+  },
 };
 
 export default config;
