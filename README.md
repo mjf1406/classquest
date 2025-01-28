@@ -4,12 +4,6 @@ Your classroom. Gamified.
 Dive into a world where education meets adventure!
 Earn rewards, unlock achievements, and transform everyday learning into an epic quest.
 
-This should not build
-
-## Name Ideas
-
-- Class Commander
-
 ## To-do List
 
 ### p5
@@ -177,9 +171,9 @@ This should not build
     - [ ] achievements
     - [ ] streaks
     - [ ] expectations
-- API Optimization 
-    - store total points, redeemed points, and lost points in student_classes
-    - 
+- API Optimization
+  - store total points, redeemed points, and lost points in student_classes
+  -
 
 ### p0
 
@@ -192,8 +186,8 @@ This should not build
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
-- fixed an issue where rewarding points is no longer optimistic on the class page 
-- The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard 
+- fixed an issue where rewarding points is no longer optimistic on the class page
+- The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard
 - BUG: fixed an issue where you could not open the tasks or expectations from inside a group
 - BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the group
 - BUG: fixed the tasks table no longer rendering over the navbar
