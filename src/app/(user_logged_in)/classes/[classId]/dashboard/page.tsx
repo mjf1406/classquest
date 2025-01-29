@@ -373,6 +373,8 @@ export default function ClassDashboard({ params }: { params: Params }) {
 
   return (
     <ContentLayout title="Class Dashboard">
+      <title>{`${courseData.class_name} | Dashboard`}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="container space-y-8 px-4 py-4">
         <div className="text-2xl font-bold">Class {courseData.class_name}</div>
 

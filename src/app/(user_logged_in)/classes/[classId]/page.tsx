@@ -35,6 +35,8 @@ export default function ClassDetails({ params }: { params: Params }) {
 
   return (
     <ContentLayout title={courseData.class_name ?? ""}>
+      <title>{courseData.class_name}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="container flex flex-col items-center gap-4 px-4 py-4">
         <div className="flex w-full flex-col gap-4">
           <div className="flex items-center justify-between gap-2">

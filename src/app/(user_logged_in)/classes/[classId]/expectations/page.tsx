@@ -7,8 +7,6 @@ import { classesOptions } from "~/app/api/queryOptions";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { CreateExpectationDialog } from "./components/CreateExpectationDialog";
-
-// Import shadcn UI components
 import StudentsExpectationsTable from "./components/StudentsExpectationsTable";
 
 interface Params {
@@ -34,6 +32,8 @@ export default function Expectations({ params }: { params: Params }) {
 
   return (
     <ContentLayout title="Expectations">
+      <title>{`${courseData?.class_name} - Expectations`}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="container flex flex-col items-center gap-4 px-4 py-4">
         <div className="flex w-full flex-col gap-4">
           <div className="semi-bold flex w-full items-center justify-between gap-2 self-start text-left text-3xl">

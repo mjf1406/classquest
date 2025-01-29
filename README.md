@@ -201,6 +201,11 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/01/29
+
+- UI: changed titles for: Tasks, Expectations, Class, Group, Student's Dashboard, Class Dashboard
+- UX: on Student's Dashboard, the tasks are now sorted from most recent
+
 2025/01/07
 
 - UX: added a display in the form of a table to the Seats and Round Robin assigner on their respective pages

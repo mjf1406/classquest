@@ -201,11 +201,24 @@ export default async function studentDashboard({ params }: { params: Params }) {
       ),
   ]);
 
-  const studentAssignments: StudentAssignmentWithDetails[] =
+  const studentAssignmentsFirst: StudentAssignmentWithDetails[] =
     rawStudentAssignments.map((assignment) => ({
       ...assignment,
       sa_complete: assignment.sa_complete ?? false,
     }));
+
+  const studentAssignments = studentAssignmentsFirst.sort((a, b) => {
+    // First sort by completion status (false before true)
+    if (a.sa_complete !== b.sa_complete) {
+      return a.sa_complete ? 1 : -1;
+    }
+
+    // Then sort by date in descending order (most recent first)
+    // Assuming there's a date field - you'll need to adjust the field name
+    return (
+      new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
+    );
+  });
 
   if (studentData.length === 0) {
     return <div className="p-5 pl-10 text-red-500">Student not found.</div>;
@@ -307,7 +320,9 @@ export default async function studentDashboard({ params }: { params: Params }) {
   }));
 
   return (
-    <main>
+    <>
+      <title>{`${student?.student_name_first_en}'s Dashboard`}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="grid grid-cols-5 gap-4">
         <div className="relative col-span-1 -ml-6 -mt-5 aspect-square w-full">
           <Image
@@ -372,6 +387,6 @@ export default async function studentDashboard({ params }: { params: Params }) {
         {/* Streaks Card */}
         <div className="col-span-1"></div>
       </div>
-    </main>
+    </>
   );
 }

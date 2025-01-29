@@ -49,6 +49,8 @@ export default function ClassDetails({ params }: { params: Params }) {
 
   return (
     <ContentLayout title={courseData.group_name ?? ""}>
+      <title>{`${Data?.class_name} | ${courseData.group_name}`}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="container flex flex-col items-center gap-4 px-4 py-4">
         <div className="flex flex-wrap gap-2 self-start">
           <Button asChild variant="outline" className="w-fit">

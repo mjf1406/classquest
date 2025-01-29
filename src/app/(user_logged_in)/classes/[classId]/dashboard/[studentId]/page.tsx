@@ -10,7 +10,6 @@ import {
   TableHead,
   TableBody,
   TableCell,
-  TableCaption,
 } from "~/components/ui/table"; // Importing shadcn table components
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { classesOptions } from "~/app/api/queryOptions";
@@ -24,7 +23,11 @@ interface Params {
 
 const ITEMS_PER_PAGE = 10; // Number of items per page
 
-export default function StudentDashboard({ params }: { params: Params }) {
+export default function StudentDashboard_client({
+  params,
+}: {
+  params: Params;
+}) {
   const classId = params.classId;
   const studentId = params.studentId;
   const [pointCurrentPage, setPointCurrentPage] = useState(1);
@@ -182,6 +185,8 @@ export default function StudentDashboard({ params }: { params: Params }) {
     <ContentLayout
       title={`${student.student_name_first_en} ${student?.student_name_last_en}'s Dashboard`}
     >
+      <title>{`${student.student_name_first_en}'s Dashboard`}</title>
+      {/* <meta name="description" content={} /> */}
       <div className="container space-y-8 px-4 py-4">
         {/* Student Info */}
         <div className="flex items-center space-x-4">

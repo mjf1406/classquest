@@ -9,7 +9,7 @@ import Providers from "./providers";
 import { APP_NAME } from "~/lib/constants";
 
 export const metadata = {
-  title: `${APP_NAME} - Tools and Worksheet Generators for Teachers`,
+  title: `${APP_NAME} - App`,
   description: `${APP_NAME} offers various tools and worksheet generators to help teachers create engaging and effective learning materials for their students.`,
   keywords: `${APP_NAME}, teacher tools, worksheet generator, education, classroom resources`,
   icons: [{ rel: "icon", url: "/favicon.ico" }],
