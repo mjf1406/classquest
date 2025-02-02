@@ -197,6 +197,7 @@ DB = database
 
 2025/02/02
 
+- UX: applying behaviors is now entirely optimistic
 - BUG: fixed an issue where rewarding points is no longer optimistic on the class page
 - BE: updated dashboard link that is sent to use app instaed of www
 - BUG: the Assigner, Jobs history table now correctly displays the data

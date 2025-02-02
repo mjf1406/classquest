@@ -17,7 +17,11 @@ import {
   DrawerTitle,
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useSuspenseQuery,
+  useQueryClient,
+  useMutation,
+} from "@tanstack/react-query";
 import { classesOptions } from "~/app/api/queryOptions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
@@ -33,7 +37,7 @@ import type { IconName, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import { useToast } from "~/components/ui/use-toast";
 import useIsMobile from "~/app/(user_logged_in)/hooks";
 import NumberInput from "~/components/ui/NumberInput";
-import type { Behavior, RewardItem } from "~/server/db/types";
+import type { Behavior, RewardItem, TeacherCourse } from "~/server/db/types";
 import CreateRewardItemDialog, {
   type RewardItemData,
 } from "~/app/(user_logged_in)/tools/points/components/CreateRewardItemDialog";
@@ -84,6 +88,17 @@ const behaviorFormSchema = z.object({
 
 export type BehaviorData = z.infer<typeof behaviorFormSchema>;
 
+// Define a type for the expected result from applyBehavior
+interface ApplyBehaviorResult {
+  success: boolean;
+  message?: string;
+}
+
+// Define the context type for our mutation so that we can safely access previousClasses.
+interface MutationContext {
+  previousClasses: TeacherCourse[] | undefined;
+}
+
 const StudentDialog: React.FC<StudentDialogProps> = ({
   studentId,
   classId,
@@ -95,12 +110,6 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
     useState(false);
   const [isCreateRewardItemDialogOpen, setIsCreateRewardItemDialogOpen] =
     useState(false);
-  const [loadingBehaviorId, setLoadingBehaviorId] = useState<string | null>(
-    null,
-  );
-  const [loadingRewardItemId, setLoadingRewardItemId] = useState<string | null>(
-    null,
-  ); // New state for reward items
   const { toast } = useToast();
   const { data: coursesData = [] } = useSuspenseQuery(classesOptions);
   const courseData = coursesData.find((course) => course.class_id === classId);
@@ -133,53 +142,97 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
       0,
     ) ?? 0;
 
-  const [inputQuantity, setInputQuantity] = useState<number>(1); // State for custom quantity
+  const [inputQuantity, setInputQuantity] = useState<number>(1);
 
-  // Existing function to handle behavior selection
-  const handleBehaviorSelect = async (behavior_id: string): Promise<void> => {
-    setLoadingBehaviorId(behavior_id);
-    const classId = courseData?.class_id;
-    try {
-      const result = await applyBehavior(
-        behavior_id,
+  // Optimistic update mutation for applying a behavior.
+  const applyBehaviorMutation = useMutation<
+    ApplyBehaviorResult,
+    unknown,
+    { behavior_id: string; inputQuantity: number },
+    MutationContext
+  >({
+    mutationFn: async (payload) => {
+      return await applyBehavior(
+        payload.behavior_id,
         [studentData!],
-        classId!,
-        inputQuantity,
+        classId,
+        payload.inputQuantity,
       );
-      if (result.success) {
-        await queryClient.invalidateQueries(classesOptions);
-        onClose();
+    },
+    onMutate: async (payload) => {
+      const behavior = courseData?.behaviors?.find(
+        (b) => b.behavior_id === payload.behavior_id,
+      );
+      if (!behavior) return { previousClasses: undefined };
+      await queryClient.cancelQueries({ queryKey: ["classes"] });
+      const previousClasses = queryClient.getQueryData<TeacherCourse[]>([
+        "classes",
+      ]);
+      queryClient.setQueryData<TeacherCourse[]>(["classes"], (oldClasses) => {
+        if (!oldClasses) return oldClasses;
+        return oldClasses.map((course) => {
+          if (course.class_id !== classId) return course;
+          if (course.students) {
+            const updatedStudents = course.students.map((student) => {
+              if (student.student_id === studentId) {
+                return {
+                  ...student,
+                  points:
+                    (student.points ?? 0) +
+                    behavior.point_value * payload.inputQuantity,
+                };
+              }
+              return student;
+            });
+            return { ...course, students: updatedStudents };
+          }
+          return course;
+        });
+      });
+      return { previousClasses };
+    },
+    onError: (_error, _payload, context) => {
+      if (context?.previousClasses) {
+        queryClient.setQueryData(["classes"], context.previousClasses);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to apply behavior. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (data, _payload) => {
+      if (data.success) {
         toast({
           title: "Success",
           description: "Behavior applied successfully.",
         });
+        onClose();
       } else {
-        console.error("Error applying behavior:", result.message);
         toast({
           title: "Error",
-          description: `Failed to apply behavior: ${result.message}! Please try again.`,
+          description:
+            data.message ?? "Failed to apply behavior. Please try again.",
           variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error("Error applying behavior:", error);
-      toast({
-        title: "Error",
-        description: `An unexpected error occurred while applying the behavior. Please try again.`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingBehaviorId(null);
-    }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries(classesOptions);
+    },
+  });
+
+  // Immediately call the mutation without setting a temporary loading state.
+  const handleBehaviorSelect = async (behavior_id: string): Promise<void> => {
+    onClose();
+    applyBehaviorMutation.mutate({ behavior_id, inputQuantity });
   };
 
-  // Updated handleCreateBehavior to reflect success toast
   const handleCreateBehavior = async (
     newBehavior: BehaviorData,
   ): Promise<void> => {
     try {
       const result = await createBehavior(newBehavior);
-
       if (result.success) {
         await queryClient.invalidateQueries(classesOptions);
         setIsCreateBehaviorDialogOpen(false);
@@ -214,9 +267,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
         title: rewardItem.title ?? undefined,
         achievements: rewardItem.achievements ?? [],
       };
-
       const result = await createRewardItem(rewardItemData);
-
       if (result.success) {
         await queryClient.invalidateQueries(classesOptions);
         setIsCreateRewardItemDialogOpen(false);
@@ -242,46 +293,65 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
     }
   };
 
-  // New function to handle reward item selection
   const handleRewardItemSelect = async (item_id: string): Promise<void> => {
-    setLoadingRewardItemId(item_id);
-    const classId = courseData?.class_id;
-    try {
-      console.log("🚀 ~ handleRewardItemSelect ~ item_id:", item_id);
-      const result = await applyRewardItem(
-        item_id,
+    onClose();
+    applyRewardItemMutation.mutate({ item_id, inputQuantity });
+  };
+
+  // Mutation for applying a reward item with optimistic updates.
+  const applyRewardItemMutation = useMutation<
+    ApplyBehaviorResult,
+    unknown,
+    { item_id: string; inputQuantity: number },
+    MutationContext
+  >({
+    mutationFn: async (payload) => {
+      return await applyRewardItem(
+        payload.item_id,
         [studentData!],
-        classId!,
-        inputQuantity,
+        classId,
+        payload.inputQuantity,
       );
-      if (result.success) {
-        await queryClient.invalidateQueries(classesOptions);
-        onClose();
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["classes"] });
+      const previousClasses = queryClient.getQueryData<TeacherCourse[]>([
+        "classes",
+      ]);
+      return { previousClasses };
+    },
+    onError: (_error, _payload, context) => {
+      if (context?.previousClasses) {
+        queryClient.setQueryData(["classes"], context.previousClasses);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to redeem reward item. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (data, _payload) => {
+      if (data.success) {
         toast({
           title: "Success",
           description: "Reward item redeemed successfully.",
         });
+        onClose();
       } else {
-        console.error("Error applying reward item:", result.message);
         toast({
           title: "Error",
-          description: `Failed to redeem reward item: ${result.message}! Please try again.`,
+          description:
+            data.message ?? "Failed to redeem reward item. Please try again.",
           variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error("Error applying reward item:", error);
-      toast({
-        title: "Error",
-        description: `An unexpected error occurred while redeeming the reward item. Please try again.`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingRewardItemId(null);
-    }
-  };
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries(classesOptions);
+    },
+  });
 
-  const isMobile = useIsMobile(); // Use the hook here
+  const isMobile = useIsMobile();
 
   const refreshBehaviors = () => {
     void queryClient.invalidateQueries(classesOptions);
@@ -296,7 +366,6 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
       <div className="absolute left-1 top-1 text-xl">
         #{studentData?.student_number}
       </div>
-      {/* Main Content */}
       <div className="m-auto flex w-full flex-col items-center justify-center gap-5">
         <div className="text-2xl">
           <FontAwesomeIcon
@@ -351,11 +420,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
               <div className="flex flex-col items-center justify-center gap-5">
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        setIsCreateBehaviorDialogOpen(true);
-                      }}
-                    >
+                    <Button onClick={() => setIsCreateBehaviorDialogOpen(true)}>
                       Create Behavior
                     </Button>
                     <Button
@@ -369,7 +434,6 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                     </Button>
                   </div>
                 )}
-                {/* Optional: Add NumberInput to specify custom quantity */}
                 <div className="flex items-center gap-2">
                   <span>Quantity</span>
                   <NumberInput
@@ -384,20 +448,16 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                 <BehaviorsGrid
                   behaviors={positiveBehaviors}
                   onBehaviorSelect={handleBehaviorSelect}
-                  loadingBehaviorId={loadingBehaviorId}
                   refreshBehaviors={refreshBehaviors}
                   role={courseData?.role ?? "primary"}
+                  loadingBehaviorId={""}
                 />
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center gap-5">
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        setIsCreateBehaviorDialogOpen(true);
-                      }}
-                    >
+                    <Button onClick={() => setIsCreateBehaviorDialogOpen(true)}>
                       Create Behavior
                     </Button>
                     <Button
@@ -420,11 +480,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
               <div className="flex flex-col items-center justify-center gap-5">
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        setIsCreateBehaviorDialogOpen(true);
-                      }}
-                    >
+                    <Button onClick={() => setIsCreateBehaviorDialogOpen(true)}>
                       Create Behavior
                     </Button>
                     <Button
@@ -438,13 +494,13 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                     </Button>
                   </div>
                 )}
-                {/* Optional: Add NumberInput to specify custom quantity */}
                 <div className="flex items-center gap-2">
                   <span>Quantity</span>
                   <NumberInput
                     value={inputQuantity}
                     onChange={setInputQuantity}
                     min={1}
+                    max={10}
                     step={1}
                     name="inputQuantity"
                     id="inputQuantity"
@@ -453,20 +509,16 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                 <BehaviorsGrid
                   behaviors={negativeBehaviors}
                   onBehaviorSelect={handleBehaviorSelect}
-                  loadingBehaviorId={loadingBehaviorId}
                   refreshBehaviors={refreshBehaviors}
                   role={courseData?.role ?? "primary"}
+                  loadingBehaviorId={""}
                 />
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center gap-5">
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
-                    <Button
-                      onClick={() => {
-                        setIsCreateBehaviorDialogOpen(true);
-                      }}
-                    >
+                    <Button onClick={() => setIsCreateBehaviorDialogOpen(true)}>
                       Create Behavior
                     </Button>
                     <Button
@@ -490,9 +542,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => {
-                        setIsCreateRewardItemDialogOpen(true);
-                      }}
+                      onClick={() => setIsCreateRewardItemDialogOpen(true)}
                     >
                       Create Reward Item
                     </Button>
@@ -507,13 +557,13 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                     </Button>
                   </div>
                 )}
-                {/* Optional: Add NumberInput to specify quantity */}
                 <div className="flex items-center gap-2">
                   <span>Quantity</span>
                   <NumberInput
                     value={inputQuantity}
                     onChange={setInputQuantity}
                     min={1}
+                    max={10}
                     step={1}
                     name="inputQuantity"
                     id="inputQuantity"
@@ -522,9 +572,9 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                 <RewardItemsGrid
                   rewardItems={rewardItems}
                   onRewardItemSelect={handleRewardItemSelect}
-                  loadingItemId={loadingRewardItemId}
                   refreshRewardItems={refreshRewardItems}
                   role={courseData?.role ?? "primary"}
+                  loadingItemId={""}
                 />
               </div>
             ) : (
@@ -532,9 +582,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
                 {courseData?.role === "primary" && (
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => {
-                        setIsCreateRewardItemDialogOpen(true);
-                      }}
+                      onClick={() => setIsCreateRewardItemDialogOpen(true)}
                     >
                       Create Reward Item
                     </Button>
@@ -560,9 +608,9 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
 
   return (
     <>
-      {isMobile ? (
+      {useIsMobile() ? (
         <Drawer
-          open={true} // Always open when rendered
+          open
           onOpenChange={(open) => {
             if (!open) onClose();
           }}
@@ -597,7 +645,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
         </Drawer>
       ) : (
         <Dialog
-          open={true} // Always open when rendered
+          open
           onOpenChange={(open) => {
             if (!open) onClose();
           }}
