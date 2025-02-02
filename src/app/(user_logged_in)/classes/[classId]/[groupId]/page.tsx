@@ -54,17 +54,17 @@ export default function ClassDetails({ params }: { params: Params }) {
       <div className="container flex flex-col items-center gap-4 px-4 py-4">
         <div className="flex flex-wrap gap-2 self-start">
           <Button asChild variant="outline" className="w-fit">
-            <Link href={`/classes/${courseData.class_id}/dashboard`}>
+            <Link href={`/classes/${Data?.class_id}/dashboard`}>
               <LayoutDashboard className="mr-2 h-5 w-5" /> Dashboard
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-fit">
-            <Link href={`/classes/${courseData.class_id}/tasks`}>
+            <Link href={`/classes/${Data?.class_id}/tasks`}>
               <NotebookPen className="mr-2 h-5 w-5" /> Tasks
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-fit">
-            <Link href={`/classes/${courseData.class_id}/expectations`}>
+            <Link href={`/classes/${Data?.class_id}/expectations`}>
               <CircleCheckBig className="mr-2 h-5 w-5" /> Expectations
             </Link>
           </Button>

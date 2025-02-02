@@ -20,10 +20,14 @@ const RoundRobinTable: React.FC<RoundRobinTableProps> = ({
   data,
   classData,
 }) => {
+  console.log("🚀 ~ classData:", classData);
+  console.log("🚀 ~ data:", data);
   const roles = Object.keys(data);
+  console.log("🚀 ~ roles:", roles);
   const studentIds = Array.from(
     new Set(Object.values(data).flatMap((students) => Object.keys(students))),
   ).sort();
+  console.log("🚀 ~ studentIds:", studentIds);
 
   return (
     <div className="overflow-x-auto">
@@ -50,7 +54,7 @@ const RoundRobinTable: React.FC<RoundRobinTableProps> = ({
               </TableCell>
               {roles.map((role) => (
                 <TableCell key={`${studentId}-${role}`}>
-                  {data?.role?.[studentId] ?? 0}
+                  {data?.[role]?.[studentId] ?? 0}
                 </TableCell>
               ))}
             </TableRow>

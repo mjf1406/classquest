@@ -180,18 +180,12 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
 - BUG: fixed a bug that would cause the mouse to click through the sorting dropdown .
 - FEATURE: Expectations -- can edit expectations
 - FEATURE: Expectations -- can delete expectations
-- Branding: Pick a [name](https://docs.google.com/spreadsheets/d/1RoLmZ_o2Bnqvu4a_prFKneWKNbPndqWqoSxR9zfRgLE/edit?gid=0#gid=0)
 - PAGE: Settings -- Need...
   1. Customizable achievement thresholds
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
-- fixed an issue where rewarding points is no longer optimistic on the class page
 - The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard
-- BUG: fixed an issue where you could not open the tasks or expectations from inside a group
-- BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the group
-- BUG: fixed the tasks table no longer rendering over the navbar
-- BUG: the Assigner, Jobs history table does not seem to have the right data as everything shows 0
 - added default expectations with defaults based on the students' reading levels
 
 ## Change Log
@@ -200,6 +194,17 @@ BE = backend
 UX = user experience
 UI = user interface
 DB = database
+
+2025/02/02
+
+- BUG: fixed an issue where rewarding points is no longer optimistic on the class page
+- BE: updated dashboard link that is sent to use app instaed of www
+- BUG: the Assigner, Jobs history table now correctly displays the data
+- BUG: fixed an issue where taking attendance in a group would overwrite attendance for the whole class instead of just the groupds
+- UX: attendance updates are now optimistic
+- UX: by default, students are no longer given 1 point per task completed
+- BUG: fixed the tasks table no longer rendering over the navbar
+- BUG: fixed an issue where you could not open the tasks or expectations from inside a group
 
 2025/01/29
 

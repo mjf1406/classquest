@@ -2,12 +2,7 @@
 
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useTransition,
-  ReactEventHandler,
-} from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -62,11 +57,12 @@ import {
 } from "~/components/ui/alert-dialog"; // Import AlertDialog components
 import { deleteStudent } from "../actions";
 import { AddStudentsDialog } from "../../components/AddStudents";
-import type { Student } from "~/server/db/types";
+import type { Student, TeacherCourse } from "~/server/db/types";
 import { saveAttendance } from "../attendanceActions";
 import { useToast } from "~/components/ui/use-toast";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { classesOptions } from "~/app/api/queryOptions";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 type SortingState = "student_number" | "last_name" | "first_name" | "points";
 
@@ -140,13 +136,114 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
   // New state for Compact Mode
   const [isCompactMode, setIsCompactMode] = useState<boolean>(false);
 
+  // Query client for optimistic updates
+  const queryClient = useQueryClient();
+
+  // Mutation for saving attendance with optimistic updates
+  const attendanceMutation = useMutation({
+    mutationFn: async ({
+      classId,
+      date,
+      absentStudentIds,
+      studentIdsToUpdate,
+    }: {
+      classId: string;
+      date: string;
+      absentStudentIds: string[];
+      studentIdsToUpdate?: string[];
+    }) => {
+      const result = await saveAttendance(
+        classId,
+        date,
+        absentStudentIds,
+        studentIdsToUpdate,
+      );
+      return result;
+    },
+    onMutate: async ({ classId, date, absentStudentIds }) => {
+      await queryClient.cancelQueries({ queryKey: ["classes"] });
+      const previousClasses = queryClient.getQueryData<TeacherCourse[]>([
+        "classes",
+      ]);
+      queryClient.setQueryData<TeacherCourse[]>(["classes"], (oldClasses) => {
+        if (!oldClasses) return oldClasses;
+        return oldClasses.map((course) => {
+          if (course.class_id !== classId) return course;
+          if (course.students) {
+            const updatedStudents = course.students.map((student) => {
+              const isAbsent = absentStudentIds.includes(student.student_id);
+              const today = date;
+              let newAbsentDates: string[] = student.absent_dates
+                ? [...student.absent_dates]
+                : [];
+              if (isAbsent) {
+                if (!newAbsentDates.includes(today)) {
+                  newAbsentDates.push(today);
+                }
+              } else {
+                newAbsentDates = newAbsentDates.filter((d) => d !== today);
+              }
+              return { ...student, absent_dates: newAbsentDates };
+            });
+            return { ...course, students: updatedStudents };
+          }
+          return course;
+        });
+      });
+      return { previousClasses };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousClasses) {
+        queryClient.setQueryData(["classes"], context.previousClasses);
+      }
+      toast({
+        title: "Error",
+        description: "Failed to save attendance.",
+      });
+    },
+    onSuccess: (data, variables, context) => {
+      if (data.success) {
+        void queryClient.invalidateQueries(classesOptions);
+        toast({
+          title: "Success",
+          description: "Attendance saved successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to save attendance.",
+        });
+      }
+    },
+    onSettled: () => {
+      setIsAttendanceSaving(false);
+      setIsAttendanceMode(false);
+      setAttendanceStatus({});
+    },
+  });
+
   // Handler to update the students state when new students are added
+  // Update the handleStudentsAdded function to match the exact StudentData type
   const handleStudentsAdded = (newStudents: Student[]) => {
-    // Map the new students to match the StudentData type if necessary
-    const mappedNewStudents: StudentData[] = newStudents.map((student) => ({
-      ...student,
-    })) as unknown as StudentData[];
-    setStudents((prevStudents) => [...prevStudents, ...mappedNewStudents]);
+    const convertedStudents: StudentData[] = newStudents.map((student) => ({
+      // Required fields
+      student_id: student.student_id ?? "", // Provide a default value for student_id
+      student_name_en: student.student_name_en ?? "",
+      student_name_first_en: student.student_name_first_en ?? "",
+      student_name_last_en: student.student_name_last_en ?? "",
+
+      // Nullable fields
+      student_name_alt: student.student_name_alt ?? "",
+      student_reading_level: student.student_reading_level ?? null,
+      student_grade: student.student_grade ?? null,
+      student_sex: student.student_sex ?? null,
+      student_number: student.student_number ?? null,
+      student_email: student.student_email ?? null,
+      enrollment_date: student.enrollment_date ?? null,
+      redemption_history: [],
+    }));
+
+    setStudents((prevStudents) => [...prevStudents, ...convertedStudents]);
   };
 
   // Function to open the ApplyBehaviorDialog
@@ -164,8 +261,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
 
   // Create a memoized empty array
   const emptyGroups = React.useMemo(() => [], []);
-
-  // Ensure groups is always the same reference when empty
   groups = groups ?? emptyGroups;
 
   // Generate groupsOptions from groups prop
@@ -249,7 +344,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
 
   const handleMultiSelectToggle = () => {
     setIsMultiSelectMode(!isMultiSelectMode);
-    // Reset selected students when exiting multi-select mode
     if (isMultiSelectMode) {
       setSelectedStudents([]);
     }
@@ -257,24 +351,19 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
 
   const getCurrentDate = (): string => {
     const now = new Date();
-
     const formatter = new Intl.DateTimeFormat("en-CA", {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     });
-
     const parts = formatter.formatToParts(now);
-
     const yearPart = parts.find((part) => part.type === "year");
     const monthPart = parts.find((part) => part.type === "month");
     const dayPart = parts.find((part) => part.type === "day");
-
     const year = yearPart ? yearPart.value : "";
     const month = monthPart ? monthPart.value : "";
     const day = dayPart ? dayPart.value : "";
-
     return `${year}-${month}-${day}`; // YYYY-MM-DD
   };
 
@@ -311,15 +400,12 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
     } else if (isMultiSelectMode) {
       setSelectedStudents((prevSelected) => {
         if (prevSelected.some((s) => s.student_id === studentId)) {
-          // Deselect student
           return prevSelected.filter((s) => s.student_id !== studentId);
         } else {
-          // Select student
           return [...prevSelected, student];
         }
       });
     } else {
-      // Open the StudentDialog for viewing details
       setSelectedStudentToView(student);
       setIsStudentDialogOpen(true);
     }
@@ -332,7 +418,7 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
   };
 
   const handleSelectAllPresent = () => {
-    const today = getCurrentDate(); // Get today's date
+    const today = getCurrentDate();
     const presentStudents = students.filter(
       (student) => !student.absent_dates?.includes(today),
     );
@@ -342,7 +428,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
 
   const handleApplyClick = () => {
     if (!isMultiSelectMode) {
-      // Select all present students and enable multi-select mode
       const today = getCurrentDate();
       const presentStudents = students.filter(
         (student) => !student.absent_dates?.includes(today),
@@ -351,89 +436,32 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
       setIsMultiSelectMode(true);
       setIsApplyBehaviorDialogOpen(true);
     }
-
-    // Open the ApplyBehaviorDialog if there are selected students
     if (selectedStudents.length > 0) {
       setIsApplyBehaviorDialogOpen(true);
     }
   };
 
-  const handleSaveAttendance = async () => {
-    setIsAttendanceSaving(true); // Start loading state
-    // Get the current date in user's timezone
+  // Updated handleSaveAttendance using optimistic updates via TanStack Query.
+  // Note that we now pass the IDs of the students currently displayed.
+  const handleSaveAttendance = () => {
     const date = getCurrentDate();
-
-    // Prepare attendance data
     const absentStudentIds = Object.keys(attendanceStatus).filter(
       (studentId) => attendanceStatus[studentId] === "absent",
     );
-
-    // Call the server action to save attendance
-    try {
-      const result = await saveAttendance(classId, date, absentStudentIds);
-      if (result.success) {
-        // Show a success message
-        toast({
-          title: "Success",
-          description: "Attendance saved successfully.",
-        });
-        console.log("Attendance saved successfully.");
-
-        // Update students' absent_dates in local state
-        setStudents((prevStudents) =>
-          prevStudents.map((student) => {
-            const isAbsent = absentStudentIds.includes(student.student_id);
-            const updatedAbsentDates = student.absent_dates ?? [];
-            const today = getCurrentDate();
-
-            if (isAbsent) {
-              // Add today's date if not already present
-              if (!updatedAbsentDates.includes(today)) {
-                updatedAbsentDates.push(today);
-              }
-            } else {
-              // Remove today's date if present
-              const index = updatedAbsentDates.indexOf(today);
-              if (index > -1) {
-                updatedAbsentDates.splice(index, 1);
-              }
-            }
-
-            return {
-              ...student,
-              absent_dates: updatedAbsentDates,
-            };
-          }),
-        );
-      } else {
-        // Handle error
-        console.error("Error saving attendance:", result.message);
-        toast({
-          title: "Error",
-          description: "Failed to save attendance.",
-        });
-      }
-    } catch (error) {
-      console.error("Error saving attendance:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-      });
-    } finally {
-      setIsAttendanceSaving(false); // End loading state
-      // After saving, exit attendance mode
-      setIsAttendanceMode(false);
-      setAttendanceStatus({});
-    }
+    setIsAttendanceSaving(true);
+    const studentIdsToUpdate = students.map((student) => student.student_id);
+    attendanceMutation.mutate({
+      classId,
+      date,
+      absentStudentIds,
+      studentIdsToUpdate,
+    });
   };
 
-  // Update selectedStudents when filters change
   useEffect(() => {
-    // If filters are default, clear selection
     if (selectedFilter === "none" && selectedGroupFilter === "all") {
       setSelectedStudents([]);
     } else {
-      // Build the list of student objects matching the filters
       let filteredStudents = [...students];
 
       if (selectedFilter !== "none") {
@@ -474,7 +502,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
     groupStudentIds,
   ]);
 
-  // Function to handle student updates from the edit dialog
   const handleStudentUpdate = (updatedStudent: StudentData) => {
     setStudents((prevStudents) =>
       prevStudents.map((student) =>
@@ -485,69 +512,55 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
     );
   };
 
-  // Function to close StudentDialog
   const closeStudentDialog = () => {
     setIsStudentDialogOpen(false);
     setSelectedStudentToView(null);
   };
 
-  // Function to close EditStudentDialog
   const closeEditDialog = () => {
     setIsEditDialogOpen(false);
     setSelectedStudentToEdit(null);
   };
 
-  // Function to open the delete confirmation dialog
   const openDeleteDialog = (student: StudentData) => {
     setStudentToDelete(student);
     setIsDeleteDialogOpen(true);
   };
 
-  // Function to close the delete confirmation dialog
   const closeDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setStudentToDelete(null);
   };
 
-  // Function to handle the deletion of a student
   const handleDeleteStudent = async () => {
     if (!studentToDelete) return;
 
     try {
-      // Start the transition to indicate pending state
       startTransition(async () => {
         const result = await deleteStudent(studentToDelete.student_id, classId);
-
         if (result.success) {
-          // Remove the deleted student from the local state
           setStudents((prevStudents) =>
             prevStudents.filter(
               (student) => student.student_id !== studentToDelete.student_id,
             ),
           );
           closeDeleteDialog();
-          // Optionally, show a success toast or notification
-          // e.g., toast.success(result.message);
         } else {
-          // Handle error (e.g., show a toast notification)
           console.error(result.message);
-          // e.g., toast.error(result.message);
         }
       });
     } catch (error) {
       console.error("Failed to delete student:", error);
-      // e.g., toast.error("An unexpected error occurred.");
     }
   };
 
-  const today = getCurrentDate(); // Get today's date once
+  const today = getCurrentDate();
 
   return (
     <div className="flex flex-col justify-center gap-4">
       {/* Top Controls */}
       <div className="flex flex-wrap items-center justify-between">
         <div className="flex gap-2">
-          {/* Existing Buttons */}
           <Button
             onClick={handleAttendanceToggle}
             variant={isAttendanceMode ? "secondary" : "default"}
@@ -577,21 +590,12 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
               onStudentsAdded={handleStudentsAdded}
             />
           )}
-          {/* New Compact Mode Toggle Button */}
           <Button
             variant={isCompactMode ? "secondary" : "default"}
             size={"icon"}
             onClick={() => setIsCompactMode(!isCompactMode)}
           >
-            {isCompactMode ? (
-              <>
-                <Monitor size={16} />
-              </>
-            ) : (
-              <>
-                <Monitor size={16} />
-              </>
-            )}
+            <Monitor size={16} />
           </Button>
         </div>
         <div className="flex flex-row items-center gap-2">
@@ -667,13 +671,11 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                 (isAttendanceMode || isMultiSelectMode) && "cursor-pointer",
                 isAttendanceMode && attendance === "absent" && "opacity-40",
                 !isAttendanceMode && isAbsentToday && "opacity-30",
-                // isCompactMode ? "flex items-center justify-center" : "",
               )}
               onClick={() => {
                 handleStudentClick(student.student_id);
               }}
             >
-              {/* Compact Mode Rendering */}
               {isCompactMode ? (
                 <>
                   <div className="absolute left-2 top-1 text-lg text-gray-500">
@@ -688,7 +690,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  {/* Points Front and Center */}
                   <CardHeader className="p-1 pt-5 md:p-6 md:pt-8">
                     <CardTitle className="flex flex-col text-center text-4xl font-bold text-primary">
                       {student.points ?? 0}
@@ -697,7 +698,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                 </>
               ) : (
                 <>
-                  {/* Attendance Indicator */}
                   {isAttendanceMode && (
                     <div className="absolute bottom-0 right-0 m-1 flex items-center justify-center rounded-xl">
                       {attendance === "present" ? (
@@ -710,8 +710,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       )}
                     </div>
                   )}
-
-                  {/* Student Number Tooltip */}
                   <div className="text-2xs absolute left-1 top-1 md:text-sm">
                     <TooltipProvider>
                       <Tooltip>
@@ -724,8 +722,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-
-                  {/* Dropdown Menu */}
                   {course?.role === "primary" && (
                     <div className="absolute bottom-1 right-1">
                       <DropdownMenu>
@@ -735,7 +731,7 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                             size={"icon"}
                             className="h-fit w-fit p-1 md:p-2"
                             onClick={(e) => {
-                              e.stopPropagation(); // Prevent card click when opening dropdown
+                              e.stopPropagation();
                             }}
                           >
                             <EllipsisVertical className="h-2 w-2 md:h-4 md:w-4" />{" "}
@@ -744,7 +740,7 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                         <DropdownMenuContent>
                           <DropdownMenuItem
                             onClick={(e) => {
-                              e.stopPropagation(); // Prevent card click when selecting edit
+                              e.stopPropagation();
                               setSelectedStudentToEdit(student);
                               setIsEditDialogOpen(true);
                             }}
@@ -754,7 +750,7 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={(e) => {
-                              e.stopPropagation(); // Prevent card click when selecting delete
+                              e.stopPropagation();
                               openDeleteDialog(student);
                             }}
                           >
@@ -764,8 +760,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       </DropdownMenu>
                     </div>
                   )}
-
-                  {/* Points Tooltip */}
                   <div className="absolute right-1 top-1 flex flex-row items-center justify-center md:right-2 md:top-2">
                     <TooltipProvider>
                       <Tooltip>
@@ -780,8 +774,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-
-                  {/* Reading Level Tooltip */}
                   <div className="absolute bottom-1 left-1 flex flex-row items-center justify-center">
                     <TooltipProvider>
                       <Tooltip>
@@ -797,8 +789,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-
-                  {/* Student Name */}
                   <CardHeader className="p-1 pt-5 md:p-6 md:pt-8">
                     <CardTitle className="flex flex-col text-center text-sm md:text-xl">
                       <div>{student.student_name_first_en}</div>
@@ -834,7 +824,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
       </div>
 
       {/* Dialogs */}
-      {/* StudentDialog */}
       {isStudentDialogOpen && selectedStudentToView && (
         <StudentDialog
           studentId={selectedStudentToView.student_id}
@@ -842,7 +831,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
           onClose={closeStudentDialog}
         />
       )}
-      {/* EditStudentDialog */}
       {isEditDialogOpen && selectedStudentToEdit && (
         <EditStudentDialog
           isOpen={isEditDialogOpen}
@@ -851,7 +839,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
           onUpdate={handleStudentUpdate}
         />
       )}
-      {/* ApplyBehaviorDialog */}
       {isApplyBehaviorDialogOpen && (
         <ApplyBehaviorDialog
           selectedStudents={selectedStudents}
@@ -859,7 +846,6 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
           onClose={closeApplyBehaviorDialog}
         />
       )}
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

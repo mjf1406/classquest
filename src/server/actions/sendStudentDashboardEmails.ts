@@ -51,7 +51,7 @@ export async function sendEmails(input: { classId: string }) {
 
   // Function to create a raw email in base64url format
   const createRawEmail = (to: string, classId: string, studentId: string): string => {
-    const dashboardUrl = `https://www.classquest.app/classes/${classId}/students/${studentId}`;
+    const dashboardUrl = `https://app.classquest.app/classes/${classId}/students/${studentId}`;
     const emailContent = [
       `To: ${to}`,
       'Content-Type: text/html; charset=UTF-8',

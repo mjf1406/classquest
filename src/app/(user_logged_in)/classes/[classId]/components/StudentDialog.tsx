@@ -89,6 +89,7 @@ const StudentDialog: React.FC<StudentDialogProps> = ({
   classId,
   onClose,
 }) => {
+  console.log("🚀 ~ studentId:", studentId);
   const queryClient = useQueryClient();
   const [isCreateBehaviorDialogOpen, setIsCreateBehaviorDialogOpen] =
     useState(false);

@@ -338,11 +338,11 @@ export default function TasksTable({ params }: { params: Params }) {
       // If checked, apply the behavior
       if (checked) {
         setLoadingBehaviorId(behaviorId);
-        await applyBehaviorMutation.mutateAsync({
-          behaviorId,
-          studentId,
-          classId,
-        });
+        // await applyBehaviorMutation.mutateAsync({
+        //   behaviorId,
+        //   studentId,
+        //   classId,
+        // });
       } else {
         // If unchecked, remove the last behavior occurrence
         setLoadingBehaviorId(behaviorId);
