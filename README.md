@@ -187,6 +187,7 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
 - The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard
 - added default expectations with defaults based on the students' reading levels
+- BE: make it so students.student_email doesn't have to be unique. This means updated the foreign key of all the tables that reference students.student_id: student_classes, student_groups, absent_dates, points, student_assignments, student_expectations.
 
 ## Change Log
 
@@ -197,6 +198,9 @@ DB = database
 
 2025/02/02
 
+- BE: new users can now create classes and have them load without error
+- BE: creating a new class no longer fails
+- BE: can create a class now, but emails have to be unique.....
 - UX: applying behaviors is now entirely optimistic
 - BUG: fixed an issue where rewarding points is no longer optimistic on the class page
 - BE: updated dashboard link that is sent to use app instaed of www

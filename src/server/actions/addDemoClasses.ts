@@ -59,7 +59,7 @@ export default async function addDemoClasses() {
     const { userId } = auth()
     if (!userId) throw new Error("User not authenticated:")
     // Insert complete demo class
-    const completeStudentIds: string = await insertClass(completeClassDemo, userId, true, "template") 
+    const completeStudentIds: string = await insertClass(completeClassDemo, true, "template") 
     const completeStudentIdsJson: StudentId[] = JSON.parse(completeStudentIds) as StudentId[]
     const completeData = completeStudentIdsJson.map(student => {
       /*

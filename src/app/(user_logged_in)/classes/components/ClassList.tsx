@@ -40,6 +40,7 @@ export default function ClassList() {
   const [isLoading, setLoading] = useState(false);
 
   const { data: courses = [] } = useSuspenseQuery(classesOptions);
+  console.log("🚀 ~ ClassList ~ courses:", courses);
 
   async function addDemos() {
     setLoading(true);

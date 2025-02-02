@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer, index, uniqueIndex, AnySQLiteColumn } from "drizzle-orm/sqlite-core";
-import { SQL, sql } from "drizzle-orm";
+import { sqliteTable, text, integer, index, uniqueIndex, type AnySQLiteColumn } from "drizzle-orm/sqlite-core";
+import { type SQL, sql } from "drizzle-orm";
 import type { AssignerItemStatuses, PointRecord, RedemptionRecord } from "./types";
 
 // Core Tables

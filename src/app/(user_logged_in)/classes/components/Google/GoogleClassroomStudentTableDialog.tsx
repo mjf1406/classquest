@@ -185,7 +185,6 @@ export default function GoogleClassroomStudentTableDialog({
           role: "primary",
           fileContents,
         },
-        userId,
         false,
         "google-classroom",
       );
