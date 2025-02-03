@@ -6,6 +6,16 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
 
 ## To-do List
 
+### p10
+
+### p9
+
+### p8
+
+### p7
+
+### p6
+
 ### p5
 
 - Learn [GoLang](https://www.youtube.com/watch?v=lNd7XlXwlho) in order to speed up data fetching by writing [the API](https://github.com/burakorkmez/react-go-tutorial/blob/master/main.go) in it
@@ -89,107 +99,6 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
   - Need to launch on [Clerk](https://clerk.com/docs/deployments/overview)
   - Add the site to Google Console so it appears on Google Search
 
-### p1
-
-- UX: Users can now add demo classes -- will need to do the following
-  - **What if we just automatically give them assistant access to a pre-created demo class when they join the site?**
-  1. Create a class for the user as the teacher called "RANDOM_ANIMAL - Demo" with year as current year.
-  2. Insert students into `students` table.
-  3. Insert students into `student_classes` table.
-  4. Insert default behaviors
-  5. Insert default redemption items
-  6. Randomly award various behaviors
-  7. Randomly have student redeem things
-  8. soooooo many more
-- FEATURE: Points -- track points on a per student, group, and class basis
-  - Make it easier for students to give points to each other. Right now, I have to redeem on the giver and then reward on the receiver. It'd be nice to just be able to transfer it.
-  - [ ] award points
-    - [x] to a single student
-      - [x] clicking on the student opens a dialog with a grid list of all behaviors, with positive and needs work as tabs
-      - [x] need a quantity that defaults to 1
-    - [x] to selected students
-    - [ ] streaks for behaviors
-      - looks at patterns automatically, while ignoring the off days and off dates
-      - for now, only see how many days in a row, look for the longest streak for each behavior
-      - list the top 5 streaks on the card, prioritizing current streaks (need to do it today/next on day to continue), view all to see for each behavior
-      - is it performed daily/weekly/monthly?
-  - [ ] positive and negative behavior
-    - [x] user can create them, setting an icon, name, and point value
-    - [x] user can edit
-    - [x] user can delete
-    - [ ] teacher is notified when a student has a streak
-  - [ ] Can delete on teacher-facing student dashboard
-- PAGE: Class Dashboard
-  - behavior streaks
-    - positive
-    - negative
-- PAGE: Teacher-facing Student Dashboard
-  - Group behaviors if they are the same time and same id like we have done on the student dashboard
-- FEATURE: Assignments
-  - Assignments Page
-    - [x] create assignments
-    - [ ] edit assignments
-    - [ ] delete assignments
-    - [x] create topics
-    - [ ] edit topics
-    - [ ] delete topics
-    - [x] sortable table basics
-    - [ ] can sort by multiple columns
-    - [x] updates assignment status when checking/unchecking
-    - [ ] add column for excused, which marks complete as false, but shows a blue checkbox with an X inside instead of an empty checkbox or checked version
-    - Assignment Filters
-      - [x] topic
-      - [ ] due date
-      - [ ] created date
-      - [ ] working date
-      - [ ] automatically exclude assignments that all students have done
-    - [x] alert teacher every x minutes if a student hasn't completed an assignment
-    - [ ] easily export URLs for each student
-  - Student Page
-    - fixed: resources links are now properly formatted as a list of links
-    - fixed: the topic name is correctly displayed instead of its ID
-    - [x] upcoming assignments that are due within 1 week
-    - [ ] list of topics in the class
-      - clicking on one takes to currentUrl/assignments
-    - [ ] behavior breakdown
-      - [ ] top 5 positive behaviors
-      - [ ] top 5 negative behaviors
-    - [ ] redemption breakdown
-      - [ ] history
-      - [ ] top 5 most common
-    - [ ] absent dates
-      - praise for 0 absent dates
-      - top x% of the class
-    - [ ] points summary
-      - [ ] total points and ranking in the class with the values of those below and above
-      - [ ] total points earned and ranking in the class with the values of those below and above
-      - [ ] total redeemed points and ranking in the class with the values of those below and above
-      - [ ] total negative points and ranking in the class with the values of those below and above
-      - explainer saying something like "you would have [total points earned] if you didn't receive [negative points]! [something encouraging]
-        - this should have a random message that has the same meaning each time they laod the page, maybe there are 10 different options
-    - [ ] titles
-    - [ ] achievements
-    - [ ] streaks
-    - [ ] expectations
-- API Optimization
-  - store total points, redeemed points, and lost points in student_classes
-  -
-
-### p0
-
-- BUG: fixed a bug that would cause the mouse to click through the sorting dropdown .
-- FEATURE: Expectations -- can edit expectations
-- FEATURE: Expectations -- can delete expectations
-- PAGE: Settings -- Need...
-  1. Customizable achievement thresholds
-  2. Select off days every week for Streaks
-  3. Select dates that are not counted for Streaks
-  4. Whether or not completed tasks automatically reward points
-- DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
-- The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard
-- added default expectations with defaults based on the students' reading levels
-- BE: switch to a new project in Clerk that only allows Google sign up and restrict it to invited users. Additionally, launch the app in Google Console so that Younghoon accounts can sign up.
-
 ## Change Log
 
 BE = backend
@@ -199,6 +108,7 @@ DB = database
 
 2025/02/03
 
+- moving the to-do list to [Notion](https://tattered-raptor-b11.notion.site/18ff3919e41d8019a43ecc4a319fa9c8?v=18ff3919e41d8128ba5b000c79c579f5), which provides multiple views
 - BE: make it so students.student_email doesn't have to be unique. This means updated the foreign key of all the tables that reference students.student_id: student_classes, student_groups, absent_dates, points, student_assignments, student_expectations.
 
 2025/02/02
