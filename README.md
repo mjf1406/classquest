@@ -184,10 +184,11 @@ Earn rewards, unlock achievements, and transform everyday learning into an epic 
   1. Customizable achievement thresholds
   2. Select off days every week for Streaks
   3. Select dates that are not counted for Streaks
+  4. Whether or not completed tasks automatically reward points
 - DB: Need to ensure assistant teachers can only apply behaviors and mark/unmark tasks. Update backend to check role and return a 403 (Forbidden) if unauthorized.
 - The student dropdown on the class page also needs to have access to the student dashboard and the teacher facing dashboard
 - added default expectations with defaults based on the students' reading levels
-- BE: make it so students.student_email doesn't have to be unique. This means updated the foreign key of all the tables that reference students.student_id: student_classes, student_groups, absent_dates, points, student_assignments, student_expectations.
+- BE: switch to a new project in Clerk that only allows Google sign up and restrict it to invited users. Additionally, launch the app in Google Console so that Younghoon accounts can sign up.
 
 ## Change Log
 
@@ -195,6 +196,10 @@ BE = backend
 UX = user experience
 UI = user interface
 DB = database
+
+2025/02/03
+
+- BE: make it so students.student_email doesn't have to be unique. This means updated the foreign key of all the tables that reference students.student_id: student_classes, student_groups, absent_dates, points, student_assignments, student_expectations.
 
 2025/02/02
 
