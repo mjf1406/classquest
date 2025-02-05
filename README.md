@@ -106,6 +106,10 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/02/05
+
+- UI: added the logo that my student created to the Student Dashboard
+
 2025/02/03
 
 - moving the to-do list to [Notion](https://tattered-raptor-b11.notion.site/18ff3919e41d8019a43ecc4a319fa9c8?v=18ff3919e41d8128ba5b000c79c579f5), which provides multiple views

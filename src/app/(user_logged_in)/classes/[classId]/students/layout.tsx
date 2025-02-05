@@ -3,6 +3,8 @@ import Link from "next/link";
 import Logo from "~/components/brand/Logo";
 import { APP_NAME } from "~/lib/constants";
 import { Suspense } from "react";
+import Image from "next/image";
+import SeojunLogoNoText from "~/components/brand/Seojun Logo No Text.png";
 
 export const metadata = {
   title: "Student Dashboard",
@@ -32,7 +34,15 @@ export default function StudentLayout({
     <>
       <header className="flex items-center justify-between bg-white p-5 dark:bg-black">
         <Link href="/" className="flex items-center gap-2">
-          <Logo fill="hsl(var(--primary))" size="25" />
+          {/* <Logo fill="hsl(var(--primary))" size="25" /> */}
+          <Image
+            src={SeojunLogoNoText}
+            alt="Funny Robot"
+            width={80}
+            height={80}
+            placeholder="blur"
+            blurDataURL=""
+          />
           <h1 className="text-2xl font-bold text-teal-600 dark:text-teal-400">
             {APP_NAME}
           </h1>
