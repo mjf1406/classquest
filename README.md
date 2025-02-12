@@ -1,4 +1,4 @@
-# ClassQuest
+# ClassClarus
 
 Your classroom. Gamified.
 Dive into a world where education meets adventure!
@@ -158,9 +158,9 @@ DB = database
 - UI: move class code to class action menu
 - UX: deleting a class now had a loading state and deletes from all tables
 - BE: if assistant teacher deletes class, they only remove themselves from the teacher_classes table
-- UX: Added a shareable link (www.classquest.app/classes/import?class_code=CODE) that opens a dialog with a grid for positive/negative behaviors and reward items for import into a selected class.
+- UX: Added a shareable link (app.classclarus.com/classes/import?class_code=CODE) that opens a dialog with a grid for positive/negative behaviors and reward items for import into a selected class.
 - BE: Migrate API calls to run on the edge (Vercel).
-- UX: Created a join class URL (www.classquest.app/classes?join_code=CODE) that auto-fills the code in the join modal, requiring only a "Join" click.
+- UX: Created a join class URL (app.classclarus.com/classes?join_code=CODE) that auto-fills the code in the join modal, requiring only a "Join" click.
 
 2025/01/03
 

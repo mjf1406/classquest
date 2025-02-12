@@ -24,7 +24,7 @@ const ClassCodeDisplay: React.FC<ClassCodeDisplayProps> = ({
 
   const copyToClipboard = () => {
     navigator.clipboard
-      .writeText(`https://www.classquest.app/classes?join_code=${classCode}`)
+      .writeText(`https://app.classclarus.com/classes?join_code=${classCode}`)
       .then(
         () => {
           toast({

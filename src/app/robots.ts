@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/api/',
     },
-    sitemap: 'https://classquest.app/sitemap.xml',
+    sitemap: 'https://app.classclarus.com/sitemap.xml',
   }
 }

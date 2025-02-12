@@ -24,7 +24,7 @@ import { AIBadge } from "~/components/AIBadge";
 import type { ItemGridData } from "~/components/ItemGrid";
 import type { Behavior, RewardItem } from "~/server/db/types";
 
-export const APP_NAME = "ClassQuest";
+export const APP_NAME = "ClassClarus";
 export const GRADES = [
   "K",
   "1",

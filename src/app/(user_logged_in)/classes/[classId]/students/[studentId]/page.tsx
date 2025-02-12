@@ -28,6 +28,7 @@ import Image from "next/image";
 import RewardItemsViewCard from "./components/RewardItemsViewCard";
 import ExpectationsCard from "./components/ExpectationsCard";
 import AchievementsCard from "./components/AchievementsCard";
+import { APP_NAME } from "../../../../../../lib/constants";
 
 interface Params {
   classId: string;
@@ -343,7 +344,7 @@ export default async function studentDashboard({ params }: { params: Params }) {
           </CardHeader>
           <CardContent>
             <p>
-              Welcome to your ClassQuest dashboard! Check out all the cards
+              Welcome to your {APP_NAME} dashboard! Check out all the cards
               below to see what&apos;s going on.
             </p>
           </CardContent>

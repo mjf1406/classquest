@@ -101,7 +101,7 @@ const ClassActionMenu: React.FC<ClassActionMenuProps> = ({
   const copyToClipboard = () => {
     navigator.clipboard
       .writeText(
-        `https://www.classquest.app/import?import_code=${course.class_code}`,
+        `https://app.classclarus.com/import?import_code=${course.class_code}`,
       )
       .then(
         () => {
@@ -149,7 +149,7 @@ const ClassActionMenu: React.FC<ClassActionMenuProps> = ({
   const handleCopyClassCode = () => {
     navigator.clipboard
       .writeText(
-        `https://www.classquest.app/classes?join_code=${course.class_code}`,
+        `https://app.classclarus.com/classes?join_code=${course.class_code}`,
       )
       .then(
         () => {

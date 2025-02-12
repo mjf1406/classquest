@@ -12,6 +12,7 @@ import {
 import { db } from "~/server/db";
 import { students } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { APP_NAME } from "../../../../../../lib/constants";
 
 export default async function StudentPage({
   params,
@@ -55,7 +56,7 @@ export default async function StudentPage({
           </CardHeader>
           <CardContent>
             <p>
-              Welcome to your ClassQuest dashboard! Check out all the cards
+              Welcome to your {APP_NAME} dashboard! Check out all the cards
               below to see what&apos;s going on.
             </p>
           </CardContent>
