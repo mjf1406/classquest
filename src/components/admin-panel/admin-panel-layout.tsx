@@ -2,9 +2,9 @@
 
 import { cn } from "~/lib/utils";
 import { useStore } from "~/hooks/use-store";
-import { Footer } from "~/components/admin-panel/footer";
 import { Sidebar } from "~/components/admin-panel/sidebar";
 import { useSidebarToggle } from "~/hooks/use-sidebar-toggle";
+import Footer from "../navigation/Footer";
 
 export default function AdminPanelLayout({
   children,
@@ -26,6 +26,7 @@ export default function AdminPanelLayout({
       >
         {children}
       </main>
+      <Footer />
       {/* <footer
         className={cn(
           "transition-[margin-left] duration-300 ease-in-out",

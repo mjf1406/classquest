@@ -13,6 +13,10 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/02/14
+
+- added the footer from the web repo
+
 2025/02/05
 
 - UI: added the logo that my student created to the Student Dashboard
