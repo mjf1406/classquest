@@ -13,6 +13,10 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/02/26
+
+- fixed: that weird, only-in-production, error when using Round Robin or Seats Assigners
+
 2025/02/14
 
 - added the footer from the web repo

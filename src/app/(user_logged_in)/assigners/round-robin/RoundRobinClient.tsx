@@ -224,6 +224,11 @@ export default function RoundRobinClient() {
           );
           if (!selectedAssigner) return null;
 
+          // Add proper null checking here
+          if (!selectedAssigner.student_item_status) return null;
+          if (!selectedAssigner.student_item_status[selectedClassId])
+            return null;
+
           const classData =
             selectedAssigner.student_item_status[selectedClassId]?.[
               selectedAssignerId
@@ -232,15 +237,13 @@ export default function RoundRobinClient() {
 
           return (
             <div>
-              {classData && (
-                <RoundRobinTable
-                  data={classData}
-                  classData={
-                    classesData.find((i) => i.class_id === selectedClassId) ??
-                    undefined
-                  }
-                />
-              )}
+              <RoundRobinTable
+                data={classData}
+                classData={
+                  classesData.find((i) => i.class_id === selectedClassId) ??
+                  undefined
+                }
+              />
             </div>
           );
         })()}
