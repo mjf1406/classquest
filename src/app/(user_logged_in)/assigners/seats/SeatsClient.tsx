@@ -26,7 +26,7 @@ import { runAssignerSeats } from "./utils";
 import type { Assigner, TeacherCourse } from "~/server/db/types";
 import DescriptionCollapsible from "./Description";
 import CaseStudyCollapsible from "./CaseStudy";
-import SeatsTable, { SeatData } from "./components/SeatsTable";
+import SeatsTable, { type SeatData } from "./components/SeatsTable";
 
 const runAssignerSchema = z.object({
   assignerId: z.string().min(1, "Assigner is required"),
@@ -59,8 +59,6 @@ export default function SeatsClient() {
   const queryClient = useQueryClient();
   const { data: assigners } = useSuspenseQuery(assignerOptions);
   const { data: classesData } = useSuspenseQuery(classesOptions);
-
-  console.log("assigners", assigners);
 
   const handleAssignerCreated = async () => {
     try {
@@ -234,13 +232,15 @@ export default function SeatsClient() {
 
           return (
             <div>
-              <SeatsTable
-                data={classData}
-                classData={
-                  classesData.find((i) => i.class_id === selectedClassId) ??
-                  undefined
-                }
-              />
+              {classData && (
+                <SeatsTable
+                  data={classData}
+                  classData={
+                    classesData.find((i) => i.class_id === selectedClassId) ??
+                    undefined
+                  }
+                />
+              )}
             </div>
           );
         })()}

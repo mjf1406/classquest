@@ -232,13 +232,15 @@ export default function RoundRobinClient() {
 
           return (
             <div>
-              <RoundRobinTable
-                data={classData}
-                classData={
-                  classesData.find((i) => i.class_id === selectedClassId) ??
-                  undefined
-                }
-              />
+              {classData && (
+                <RoundRobinTable
+                  data={classData}
+                  classData={
+                    classesData.find((i) => i.class_id === selectedClassId) ??
+                    undefined
+                  }
+                />
+              )}
             </div>
           );
         })()}
