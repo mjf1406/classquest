@@ -15,6 +15,8 @@ DB = database
 
 2025/03/02
 
+- UI: added Teaching Dashboard to Student Grid action menu
+- UI: added Student Dashboard to Student Grid action menu
 - UX: user can now delete expectations
 - UX: user can now edit expectations
 

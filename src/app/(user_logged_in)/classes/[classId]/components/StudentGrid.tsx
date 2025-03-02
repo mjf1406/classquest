@@ -31,6 +31,7 @@ import {
   Loader,
   UserCheck,
   Monitor,
+  ExternalLink,
 } from "lucide-react";
 import type { StudentData } from "~/app/api/getClassesGroupsStudents/route";
 import { FancyRadioGroup, type Option } from "./SelectRadioGroup";
@@ -63,6 +64,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { classesOptions } from "~/app/api/queryOptions";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 
 type SortingState = "student_number" | "last_name" | "first_name" | "points";
 
@@ -738,6 +740,34 @@ const StudentGrid: React.FC<StudentRosterProps> = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Link
+                              href={`/classes/${classId}/students/${student.student_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex w-full items-center justify-between gap-2"
+                            >
+                              Student Dashboard <ExternalLink size={18} />
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Link
+                              href={`/classes/${classId}/dashboard/${student.student_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex w-full items-center justify-between gap-2"
+                            >
+                              Teaching Dashboard <ExternalLink size={18} />
+                            </Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
