@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { db } from '~/server/db';
 import { auth } from '@clerk/nextjs/server';
 import { eq, inArray } from 'drizzle-orm';
