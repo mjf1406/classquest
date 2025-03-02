@@ -13,6 +13,11 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/03/02
+
+- UX: user can now delete expectations
+- UX: user can now edit expectations
+
 2025/02/26
 
 - fixed: that weird, only-in-production, error when using Round Robin or Seats Assigners

@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import EditExpectationDialog from "./EditExpectationDialog";
 
 interface StudentsTableProps {
   courseData: TeacherCourse;
@@ -35,6 +36,8 @@ export default function StudentsExpectationsTable({
 }: StudentsTableProps) {
   const [selectedStudentExp, setSelectedStudentExp] =
     useState<SelectedStudentExp | null>(null);
+  const [selectedExpectation, setSelectedExpectation] =
+    useState<Expectation | null>(null);
 
   const expectations = courseData.expectations ?? [];
 
@@ -46,7 +49,18 @@ export default function StudentsExpectationsTable({
             <TableHead className="border p-2 text-left">Student Name</TableHead>
             {expectations.map((exp) => (
               <TableHead key={exp.id} className="border p-2 text-left">
-                {exp.name}
+                <div className="flex items-center justify-between">
+                  <span>{exp.name}</span>
+                  {courseData.role === "primary" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSelectedExpectation(exp)}
+                    >
+                      <Edit size={18} />
+                    </Button>
+                  )}
+                </div>
               </TableHead>
             ))}
           </TableRow>
@@ -106,6 +120,13 @@ export default function StudentsExpectationsTable({
           studentExpectation={selectedStudentExp.studentExpectation}
           classId={courseData.class_id}
           onClose={() => setSelectedStudentExp(null)}
+        />
+      )}
+      {selectedExpectation && (
+        <EditExpectationDialog
+          expectation={selectedExpectation}
+          classId={courseData.class_id}
+          onClose={() => setSelectedExpectation(null)}
         />
       )}
     </div>

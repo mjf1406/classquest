@@ -60,6 +60,12 @@ export default function SeatsClient() {
   const { data: assigners } = useSuspenseQuery(assignerOptions);
   const { data: classesData } = useSuspenseQuery(classesOptions);
 
+  console.log(
+    "Data:",
+    assigners.find((i) => i.assigner_id === selectedAssignerId)
+      ?.student_item_status?.[selectedClassId]?.[selectedAssignerId],
+  );
+
   const handleAssignerCreated = async () => {
     try {
       await queryClient.invalidateQueries({
