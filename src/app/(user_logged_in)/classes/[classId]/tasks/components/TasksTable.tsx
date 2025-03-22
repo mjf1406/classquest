@@ -73,12 +73,14 @@ function AssignmentCell({
   isLoading,
 }: AssignmentCellProps) {
   return (
-    <TableCell className={`text-center ${checked ? "bg-secondary" : ""}`}>
+    <TableCell
+      className={`text-center ${checked ? "bg-secondary" : ""} p-1 md:p-0`}
+    >
       <Checkbox
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={isLoading}
-        className="h-6 w-6"
+        className="h-5 w-5 md:h-6 md:w-6"
       />
     </TableCell>
   );
@@ -96,8 +98,8 @@ function StudentActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <MoreVertical className="h-4 w-4" />
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 md:h-8 md:w-8">
+          <MoreVertical className="h-3.5 w-3.5 md:h-4 md:w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
@@ -338,6 +340,7 @@ export default function TasksTable({ params }: { params: Params }) {
       // If checked, apply the behavior
       if (checked) {
         setLoadingBehaviorId(behaviorId);
+        // Uncomment below to enable behavior mutation
         // await applyBehaviorMutation.mutateAsync({
         //   behaviorId,
         //   studentId,
@@ -550,7 +553,9 @@ export default function TasksTable({ params }: { params: Params }) {
   // ---- END NEW LOGIC FOR ALERT ----
 
   return (
-    <div className="w-full space-y-4 overflow-x-auto">
+    // Use a responsive container. On screens less than 960px wide, we reduce
+    // padding and font sizes to create a more compact layout.
+    <div className="w-full overflow-x-auto px-2 text-xs md:px-4 md:text-sm">
       {/* Alert Dialog for incomplete students */}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
@@ -565,7 +570,7 @@ export default function TasksTable({ params }: { params: Params }) {
               students have not completed a task in the last 10 minutes!
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-3 gap-1">
             {incompleteStudents.map((student) => (
               <div className="col-span-1" key={student.student_id}>
                 {student.student_name_first_en}
@@ -585,7 +590,7 @@ export default function TasksTable({ params }: { params: Params }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         <FancyRadioGroup
           options={allGroupsOptions}
           value={selectedGroupId}
@@ -602,12 +607,12 @@ export default function TasksTable({ params }: { params: Params }) {
           onClose={closeStudentDialog}
         />
       )}
-      <Table>
+      <Table className="min-w-[800px] table-fixed border-collapse md:min-w-full">
         <TableCaption>Tasks for {courseData?.class_name}</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead
-              className="sticky left-0 z-10 w-16 cursor-pointer bg-background text-foreground"
+              className="sticky left-0 z-10 w-16 cursor-pointer bg-background p-1 text-foreground md:p-2"
               onClick={() => handleSort("student_number")}
             >
               <div className="flex items-center justify-center">
@@ -622,7 +627,7 @@ export default function TasksTable({ params }: { params: Params }) {
             </TableHead>
 
             <TableHead
-              className="sticky left-16 z-10 w-32 cursor-pointer bg-background text-foreground"
+              className="sticky left-16 z-10 w-24 cursor-pointer bg-background p-1 text-foreground md:p-2"
               onClick={() => handleSort("group")}
             >
               <div className="flex items-center justify-center">
@@ -637,7 +642,7 @@ export default function TasksTable({ params }: { params: Params }) {
             </TableHead>
 
             <TableHead
-              className="sticky left-32 z-10 w-48 cursor-pointer border-r border-dotted border-foreground bg-background text-foreground lg:left-48"
+              className="sticky left-32 z-10 w-32 cursor-pointer border-r border-dotted border-foreground bg-background p-1 text-foreground md:p-2 lg:left-48"
               onClick={() => handleSort("student_name")}
             >
               <div className="flex items-center justify-center">
@@ -656,11 +661,20 @@ export default function TasksTable({ params }: { params: Params }) {
               return (
                 <TableHead
                   key={assignment.id}
-                  className="cursor-pointer text-foreground"
+                  className="text-2xs w-20 cursor-pointer p-1 text-foreground md:p-2"
                   onClick={() => handleSort(sortKey)}
                 >
-                  <div className="flex items-center justify-center">
-                    {assignment.name}
+                  <div className="flex items-center justify-center text-center">
+                    <p
+                      style={{
+                        hyphens: "auto",
+                        overflowWrap: "break-word",
+                        wordBreak: "break-word",
+                      }}
+                      className="break-words"
+                    >
+                      {assignment.name}
+                    </p>
                     {sortConfig?.key === sortKey &&
                       (sortConfig.order === "asc" ? (
                         <ArrowUp className="ml-1 h-4 w-4" />
@@ -680,15 +694,15 @@ export default function TasksTable({ params }: { params: Params }) {
             );
             return (
               <TableRow key={student.student_id}>
-                <TableCell className="sticky left-0 z-10 w-16 bg-background text-center">
+                <TableCell className="sticky left-0 z-10 w-16 bg-background p-1 text-center md:p-2">
                   {student.student_number}
                 </TableCell>
 
-                <TableCell className="sticky left-16 z-10 w-32 bg-background text-center">
+                <TableCell className="sticky left-16 z-10 w-32 bg-background p-1 text-center md:p-2">
                   {studentGroup?.group_name ?? "No Group"}
                 </TableCell>
 
-                <TableCell className="sticky left-32 z-10 w-48 border-r border-dotted border-foreground bg-background lg:left-48">
+                <TableCell className="sticky left-32 z-10 w-32 border-r border-dotted border-foreground bg-background p-1 md:p-2 lg:left-48">
                   <div className="flex items-center justify-between">
                     <button
                       onClick={() => handleNameClick(student)}

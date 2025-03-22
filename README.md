@@ -13,6 +13,10 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/03/22
+
+- UI: made the table more compact on smaller screens, less than 960 px window width
+
 2025/03/02
 
 - UI: added Teaching Dashboard to Student Grid action menu
