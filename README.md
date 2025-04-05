@@ -13,6 +13,16 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/04/05
+
+- UI: started on teams
+- UI: on student dashboard, added 3D printing calculator card
+
+2025/03/23
+
+- UI: subgroup page is created
+- UI: on the group page, can see subgroups
+
 2025/03/22
 
 - UI: made the table more compact on smaller screens, less than 960 px window width

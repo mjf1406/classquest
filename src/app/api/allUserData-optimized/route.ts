@@ -19,6 +19,8 @@ import {
   student_assignments,
   expectations,
   student_expectations,
+  sub_groups,
+  student_sub_groups,
 } from '~/server/db/schema';
 
 import type {
@@ -71,6 +73,7 @@ export type ClassData = {
     group_id: string;
     group_name: string;
     students: StudentData[];
+    sub_groups?: SubGroupData[];
   }[];
   students: StudentData[];
   reward_items: RewardItemData[];
@@ -79,6 +82,12 @@ export type ClassData = {
   assignments: AssignmentData[];
   expectations: Expectation[];
   student_expectations: StudentExpectation[];
+};
+
+export type SubGroupData = {
+  sub_group_id: string;
+  sub_group_name: string;
+  students: StudentData[];
 };
 
 export type AssignmentData = {
@@ -185,7 +194,6 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
   const studentGroupsPromise = groupsPromise.then((allGroups) => {
     const groupIds = allGroups.map((g) => g.group_id);
     if (groupIds.length === 0) {
-      // If there are no groups, resolve with an empty array.
       return Promise.resolve([]);
     }
     return db
@@ -196,6 +204,25 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
       })
       .from(student_groups)
       .where(inArray(student_groups.group_id, groupIds))
+      .all();
+  });
+
+  // Create promises for sub_groups and student_sub_groups.
+  const subGroupsPromise = db
+    .select()
+    .from(sub_groups)
+    .where(inArray(sub_groups.class_id, classIds))
+    .all();
+
+  const studentSubGroupsPromise = subGroupsPromise.then((allSubGroups) => {
+    const subGroupIds = allSubGroups.map((sg) => sg.sub_group_id);
+    if (subGroupIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return db
+      .select()
+      .from(student_sub_groups)
+      .where(inArray(student_sub_groups.sub_group_id, subGroupIds))
       .all();
   });
 
@@ -215,6 +242,8 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
     allStudentAssignments,
     allExpectations,
     allStudentExpectations,
+    allSubGroups,
+    allStudentSubGroups,
   ] = await Promise.all([
     // Groups for all classes.
     groupsPromise,
@@ -316,6 +345,10 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
       .from(student_expectations)
       .where(inArray(student_expectations.class_id, classIds))
       .all(),
+    // Sub groups for all classes.
+    subGroupsPromise,
+    // Student sub groups for all sub groups.
+    studentSubGroupsPromise,
   ]);
 
   // 3) Build quick lookups/groupings in memory.
@@ -334,13 +367,18 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
   const studentAssignmentsByAssignment = groupBy(allStudentAssignments, (sa) => sa.assignment_id);
   const studentGroupsByGroup = groupBy(studentGroups, (sg) => sg.group_id);
 
+  // Group sub groups by their parent group id.
+  const subGroupsByGroup = groupBy(allSubGroups, (sg) => sg.group_id);
+  const studentSubGroupsBySubGroup = groupBy(allStudentSubGroups, (ssg) => ssg.sub_group_id);
+
   // 4) Build final data shape.
   const classesWithDetails: ClassData[] = classesData.map((classData) => {
     const cid = classData.class_id;
 
-    // Build groups with students.
+    // Build groups with students and sub groups.
     const groupsForThisClass = groupsByClass.get(cid) ?? [];
     const groupsWithStudents = groupsForThisClass.map((g) => {
+      // Process students in the group.
       const memberRecords = studentGroupsByGroup.get(g.group_id) ?? [];
       const studentObjs = memberRecords
         .map((member) => {
@@ -390,10 +428,69 @@ async function fetchClassesWithDetails(userId: string): Promise<ClassData[]> {
         })
         .filter(Boolean) as StudentData[];
 
+      // Process sub groups for this group.
+      const subGroupsForThisGroup = subGroupsByGroup.get(g.group_id) ?? [];
+      const subGroupsWithStudents: SubGroupData[] = subGroupsForThisGroup.map((sg) => {
+        const studentSubGroupRecords = studentSubGroupsBySubGroup.get(sg.sub_group_id) ?? [];
+        const subGroupStudentObjs = studentSubGroupRecords
+          .map((ssg) => {
+            const studentRow = allStudents.find((s) => s.student_id === ssg.student_id);
+            if (!studentRow) return null;
+            const stPoints = pointsByStudent.get(studentRow.student_id) ?? [];
+            const totalPoints = stPoints.reduce(
+              (sum, point) => sum + point.number_of_points,
+              0
+            );
+            const pointHistory = stPoints.map((pt) => ({
+              id: pt.id,
+              user_id: pt.user_id,
+              class_id: pt.class_id,
+              student_id: pt.student_id,
+              behavior_id: pt.behavior_id,
+              reward_item_id: pt.reward_item_id,
+              type: pt.type,
+              number_of_points: pt.number_of_points,
+              created_date: pt.created_date,
+            }));
+            const redemptionHistory: RedemptionRecord[] = stPoints
+              .filter((pt) => pt.type === 'redemption')
+              .map((pt) => ({
+                item_id: pt.reward_item_id!,
+                date: pt.created_date,
+                quantity: pt.number_of_points,
+              }));
+            const absDates = absentDatesByStudent.get(studentRow.student_id) ?? [];
+            return {
+              student_id: studentRow.student_id,
+              student_name_en: studentRow.student_name_en,
+              student_name_first_en: studentRow.student_name_first_en,
+              student_name_last_en: studentRow.student_name_last_en,
+              student_name_alt: studentRow.student_name_alt,
+              student_reading_level: studentRow.student_reading_level,
+              student_grade: studentRow.student_grade,
+              student_sex: studentRow.student_sex,
+              student_number: studentRow.student_number,
+              student_email: studentRow.student_email,
+              enrollment_date: ssg.enrollment_date,
+              points: totalPoints,
+              point_history: pointHistory,
+              absent_dates: absDates.map((d) => d.date),
+              redemption_history: redemptionHistory,
+            } as StudentData;
+          })
+          .filter(Boolean) as StudentData[];
+        return {
+          sub_group_id: sg.sub_group_id,
+          sub_group_name: sg.sub_group_name,
+          students: subGroupStudentObjs,
+        } as SubGroupData;
+      });
+
       return {
         group_id: g.group_id,
         group_name: g.group_name,
         students: studentObjs,
+        sub_groups: subGroupsWithStudents,
       };
     });
 

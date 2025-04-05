@@ -29,6 +29,7 @@ import RewardItemsViewCard from "./components/RewardItemsViewCard";
 import ExpectationsCard from "./components/ExpectationsCard";
 import AchievementsCard from "./components/AchievementsCard";
 import { APP_NAME } from "../../../../../../lib/constants";
+import PrintCostCalculator from "./components/3dPrintingCard";
 
 interface Params {
   classId: string;
@@ -384,6 +385,9 @@ export default async function studentDashboard({ params }: { params: Params }) {
               (i) => i.student_id === studentId,
             )}
           />
+        </div>
+        <div className="col-span-1">
+          <PrintCostCalculator />
         </div>
         {/* Streaks Card */}
         <div className="col-span-1"></div>

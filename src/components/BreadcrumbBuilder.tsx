@@ -79,8 +79,6 @@ export function BreadcrumbBuilder() {
       let matchedStudentName = null;
 
       for (const course of coursesData) {
-        // Assuming students are nested within groups or directly under course
-        // Adjust the traversal based on your actual data structure
         if (course.students) {
           const student = course.students.find(
             (s) => s.student_id === studentId,
@@ -112,6 +110,37 @@ export function BreadcrumbBuilder() {
       } else {
         // Optionally, handle fallback if student not found
         displayName = "Student";
+      }
+    }
+
+    // NEW: Check if this is a subgroup segment
+    if (segment.startsWith("subgroup_")) {
+      const subGroupId = segment;
+      let matchedSubGroupName = null;
+
+      // Traverse coursesData: look inside each group's sub_groups property
+      for (const course of coursesData) {
+        if (course.groups) {
+          for (const group of course.groups) {
+            if (group.sub_groups) {
+              const subgroup = group.sub_groups.find(
+                (sg) => sg.sub_group_id === subGroupId,
+              );
+              if (subgroup) {
+                matchedSubGroupName = subgroup.sub_group_name;
+                break;
+              }
+            }
+          }
+          if (matchedSubGroupName) break;
+        }
+      }
+
+      if (matchedSubGroupName) {
+        displayName = matchedSubGroupName;
+      } else {
+        // Fallback in case the subgroup is not found in the data
+        displayName = "Subgroup";
       }
     }
 

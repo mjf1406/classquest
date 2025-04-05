@@ -6,13 +6,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { classesOptions } from "~/app/api/queryOptions";
 import type { Group } from "~/server/db/types";
 import StudentGrid from "../components/StudentGrid";
-import { group } from "console";
 import {
-  BreadcrumbItem,
-  BreadcrumbSeparator,
-} from "~/components/ui/breadcrumb";
-import {
-  ArrowBigRight,
   ChevronRight,
   CircleCheckBig,
   LayoutDashboard,
@@ -20,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import ClassSubgroupComponent from "../../components/ClassSubGroups";
 
 interface Params {
   classId: string;
@@ -36,6 +31,7 @@ export default function ClassDetails({ params }: { params: Params }) {
   const courseData: Group | undefined = Data?.groups?.find(
     (group) => group.group_id === groupId,
   );
+  const subgroups: Group[] | [] = courseData?.sub_groups ?? [];
 
   if (!courseData) {
     return (
@@ -79,6 +75,10 @@ export default function ClassDetails({ params }: { params: Params }) {
           <ChevronRight />
           {courseData.group_name}
         </div>
+        <ClassSubgroupComponent
+          params={{ classId, groupId }}
+          subgroups={subgroups}
+        />
         <div className="flex w-full flex-col gap-4">
           {courseData.students && (
             <StudentGrid students={courseData.students} classId={classId} />

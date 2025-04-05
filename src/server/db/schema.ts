@@ -62,6 +62,23 @@ export const groups = sqliteTable('groups',
     }
 )
 
+export const sub_groups = sqliteTable('sub_groups',
+    {
+        sub_group_id: text('sub_group_id').notNull().primaryKey(),
+        group_id: text('group_id').notNull().references(() => groups.group_id),
+        sub_group_name: text('sub_group_name').notNull(),
+        class_id: text('class_id').notNull().references(() => classes.class_id),
+        created_date: text('created_date').default(sql`CURRENT_TIMESTAMP`).notNull(),
+        updated_date: text('updated_date').default(sql`CURRENT_TIMESTAMP`).notNull(),
+    }, 
+    (table) => {
+        return {
+            sub_groups_by_class_id_idx: index("sub_groups_by_class_id_idx").on(table.class_id),
+            sub_groups_by_group_id_idx: index("sub_groups_by_group_id_idx").on(table.group_id),
+        }
+    }
+)
+
 export const reward_items = sqliteTable('reward_items',
     {
         item_id: text('item_id').notNull().primaryKey(),
@@ -169,6 +186,20 @@ export const student_groups = sqliteTable('student_groups',
     (table) => {
         return {
             groups_by_student_id_idx: index("groups_by_student_id_idx").on(table.student_id)
+        }
+    }
+)
+
+export const student_sub_groups = sqliteTable('student_sub_groups',
+    {
+        enrollment_id: text('enrollment_id').notNull().primaryKey(),
+        sub_group_id: text('sub_group_id').notNull().references(() => sub_groups.sub_group_id),
+        student_id: text('student_id').notNull().references(() => students.student_id),
+        enrollment_date: text('enrollment_date').default(sql`CURRENT_TIMESTAMP`).notNull(),
+    }, 
+    (table) => {
+        return {
+            sub_groups_by_student_id_idx: index("sub_groups_by_student_id_idx").on(table.student_id)
         }
     }
 )

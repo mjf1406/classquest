@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { db } from '~/server/db/index';
-import { groups, student_groups, students } from '~/server/db/schema';
+import { groups, student_groups, student_sub_groups, students, sub_groups } from '~/server/db/schema';
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 import type { Group } from '~/server/db/types';
@@ -86,10 +86,13 @@ export async function addGroup(formData: FormData): Promise<AddGroupResponse> {
         student_email: students.student_email,
         joined_date: students.joined_date,
         updated_date_student: students.updated_date,
+        sub_groups: sub_groups.sub_group_name,
+        sub_group_name: sub_groups.sub_group_name,
       })
       .from(groups)
       .leftJoin(student_groups, eq(student_groups.group_id, groups.group_id))
       .leftJoin(students, eq(students.student_id, student_groups.student_id))
+      .leftJoin(student_sub_groups, eq(student_sub_groups.sub_group_id, sub_groups.sub_group_id, ))
       .where(eq(groups.group_id, groupId))
       .execute();
 
@@ -104,6 +107,8 @@ export async function addGroup(formData: FormData): Promise<AddGroupResponse> {
       class_id: groupData[0]?.class_id ?? "",
       created_date: groupData[0]?.created_date ?? "",
       updated_date: groupData[0]?.updated_date ?? "",
+      sub_groups: groupData[0]?.sub_groups ?? [],
+      sub_group_name: groupData[0]?.sub_group_name ?? "",
       students: groupData.map((row) => ({
         student_id: row.student_id ?? "",
         student_name_en: row.student_name_en ?? "",
@@ -119,7 +124,7 @@ export async function addGroup(formData: FormData): Promise<AddGroupResponse> {
         updated_date: row.updated_date_student ?? "",
         enrollment_date: null,
         redemption_history: []
-      })),
+      }))
     };
 
     // Revalidate the path to update cached data

@@ -62,6 +62,9 @@ export type Group = {
     created_date: string,
     updated_date: string,
     students: StudentData[];
+    sub_groups: Group[];
+    sub_group_name: string | undefined;
+    sub_group_id?: string | undefined;
 }
 
 export type Teacher = {
