@@ -87,6 +87,7 @@ const formatDate = (dateStr: string): string => {
     month: "long",
     day: "numeric",
   };
+
   return date.toLocaleDateString(undefined, options);
 };
 
@@ -114,12 +115,16 @@ const formatDateTime = (dateTimeStr: string): string => {
     hour: "numeric",
     minute: "2-digit",
   };
+
   return date.toLocaleString(undefined, options);
 };
 
 const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
+  // New state to hold the clicked assignment
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<Assignment | null>(null);
 
   // Get only the top 5 assignments
   const topAssignments = assignments.slice(0, 5);
@@ -158,11 +163,13 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
                 {topAssignments.map((assignment) => (
                   <TableRow
                     key={assignment.sa_id}
-                    className={` ${
+                    // When a row is clicked, set the assignment as selected
+                    onClick={() => setSelectedAssignment(assignment)}
+                    className={`cursor-pointer ${
                       assignment.sa_complete
                         ? "bg-green-200 dark:bg-green-600"
                         : "bg-red-200 dark:bg-red-600"
-                    } transition-color`}
+                    } transition-colors hover:bg-blue-100 dark:hover:bg-blue-500`}
                   >
                     <TableCell>
                       <span className="font-bold text-gray-800 dark:text-gray-200">
@@ -179,6 +186,8 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog for All Tasks */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-h-screen w-[100vw] overflow-y-auto">
           <DialogHeader>
@@ -187,6 +196,7 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
             </DialogTitle>
             <DialogClose className="absolute right-4 top-4" />
           </DialogHeader>
+
           {/* Instructional Steps */}
           <div className="mt-6 flex flex-col items-start justify-center">
             <Collapsible
@@ -275,11 +285,11 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
                 {assignments.map((assignment) => (
                   <TableRow
                     key={assignment.sa_id}
-                    className={`${
+                    className={`transition-colors hover:bg-blue-100 dark:hover:bg-blue-500 ${
                       assignment.sa_complete
                         ? "bg-green-200 dark:bg-green-600"
                         : "bg-red-200 dark:bg-red-600"
-                    } transition-colors hover:bg-blue-100 dark:hover:bg-blue-500`}
+                    }`}
                   >
                     {/* Assignment Name */}
                     <TableCell>
@@ -287,12 +297,10 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
                         {assignment.assignment_name}
                       </span>
                     </TableCell>
-
                     {/* Assignment Description */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.assignment_description ?? "—"}
                     </TableCell>
-
                     {/* Assignment Data */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.assignment_data ? (
@@ -308,36 +316,30 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
                         "—"
                       )}
                     </TableCell>
-
                     {/* Due Date */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.due_date
                         ? formatDate(assignment.due_date)
                         : "—"}
                     </TableCell>
-
                     {/* Working Date */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.working_date
                         ? formatDate(assignment.working_date)
                         : "—"}
                     </TableCell>
-
                     {/* Created Date */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {formatDate(assignment.created_date)}
                     </TableCell>
-
                     {/* Topic */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.topic ?? "—"}
                     </TableCell>
-
                     {/* Completion Status */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.sa_complete ? "✅ Yes" : "❌ No"}
                     </TableCell>
-
                     {/* Completed At */}
                     <TableCell className="text-gray-700 dark:text-gray-300">
                       {assignment.sa_completed_ts
@@ -348,6 +350,74 @@ const AssignmentTable: React.FC<AssignmentTableProps> = ({ assignments }) => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for Individual Assignment Details */}
+      <Dialog
+        open={selectedAssignment !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedAssignment(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedAssignment?.assignment_name}</DialogTitle>
+            <DialogClose className="absolute right-4 top-4" />
+          </DialogHeader>
+          <div className="flex flex-col space-y-2 px-4 py-2">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Description: </strong>
+              {selectedAssignment?.assignment_description ?? "—"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Resources: </strong>
+              {selectedAssignment?.assignment_data ? (
+                <a
+                  href={selectedAssignment.assignment_data}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 underline"
+                >
+                  View Data
+                </a>
+              ) : (
+                "—"
+              )}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Due Date: </strong>
+              {selectedAssignment?.due_date
+                ? formatDate(selectedAssignment.due_date)
+                : "—"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Working Date: </strong>
+              {selectedAssignment?.working_date
+                ? formatDate(selectedAssignment.working_date)
+                : "—"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Created Date: </strong>
+              {selectedAssignment
+                ? formatDate(selectedAssignment.created_date)
+                : "—"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Topic: </strong>
+              {selectedAssignment?.topic ?? "—"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Completed: </strong>
+              {selectedAssignment?.sa_complete ? "Yes" : "No"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Completed At: </strong>
+              {selectedAssignment?.sa_completed_ts
+                ? formatDateTime(selectedAssignment.sa_completed_ts)
+                : "—"}
+            </p>
           </div>
         </DialogContent>
       </Dialog>

@@ -13,6 +13,10 @@ UX = user experience
 UI = user interface
 DB = database
 
+2025/04/07
+
+- UI: students always want to click on assignments in the card table, instead of clicking View all tasks, so that is not possible
+
 2025/04/05
 
 - UI: started on teams
