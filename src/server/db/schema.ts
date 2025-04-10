@@ -13,6 +13,7 @@ export const users = sqliteTable('users',
         added_demo: integer('added_demo', { mode: 'boolean' }),
         joined_date: text('joined_date').default(sql`CURRENT_TIMESTAMP`).notNull(), 
         updated_date: text('updated_date').default(sql`CURRENT_TIMESTAMP`).notNull(),
+        fuck_nut: text('fuck_nut'),
     }
 )
 
