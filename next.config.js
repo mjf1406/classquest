@@ -6,6 +6,11 @@ const config = {
         source: "/",
         destination: "/classes",
         permanent: true, // or false for temporary redirect
+        experimental: {
+          serverActions: {
+            bodySizeLimit: "10mb", // Increase from default 1MB to 10MB
+          },
+        },
       },
     ];
   },
